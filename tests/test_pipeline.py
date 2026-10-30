@@ -90,16 +90,16 @@ class Pipeline(unittest.TestCase):
         counts = report.run(self.db, ROOT / "sql" / "analysis.sql", out)
         self.assertEqual(set(counts), {"emission_share_check", "coverage", "latest_snapshot", "network_daily", "concentration_by_day",
                                        "activity_vs_reward_30d", "emission_trend_90d",
-                                       "subnet_daily_dashboard", "concentration_by_month"})
+                                       "subnet_daily_dashboard", "concentration_by_month",
+                                       "concentration_quality"})
         dash = list(csv.DictReader(open(out / "subnet_daily_dashboard.csv")))
         self.assertEqual(len(dash), 300)
         self.assertEqual(dash[0]["subnet"], "SN1")
         self.assertAlmostEqual(float(dash[0]["emission_share_pct"]), 50.0)
-        conc = list(csv.DictReader(open(out / "concentration_by_day.csv")))
-        self.assertEqual(len(conc), 100)
-        self.assertAlmostEqual(float(conc[-1]["top10_share"]), 1.0)          # only 3 subnets
-        self.assertAlmostEqual(float(conc[-1]["hhi"]), 0.5**2 + 0.3**2 + 0.2**2, places=4)
-        self.assertEqual(conc[-1]["quality_ok"], "0")        # only 3 subnets with a share: fails rule (b)
+        quality = list(csv.DictReader(open(out / "concentration_quality.csv")))
+        self.assertEqual(len(quality), 100)
+        self.assertEqual(quality[-1]["quality_ok"], "0")     # only 3 subnets with a share: fails rule (b)
+        self.assertEqual(list(csv.DictReader(open(out / "concentration_by_day.csv"))), [])
         self.assertEqual(list(csv.DictReader(open(out / "concentration_by_month.csv"))), [])
         act = {r["netuid"]: r for r in csv.DictReader(open(out / "activity_vs_reward_30d.csv"))}
         self.assertEqual(int(act["1"]["days"]), 30)
@@ -115,3 +115,30 @@ class Pipeline(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Concentration(unittest.TestCase):
+    """40 subnets sharing 100 % equally passes both quality rules: top-10 share 0.25, HHI 1/40."""
+
+    def test_quality_day_values(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            run = base / "raw" / "20261030T120000Z"
+            run.mkdir(parents=True)
+            manifest = {"source": "synthetic", "span": "ALL", "started_utc": "x", "files": {}, "skipped": {}}
+            for netuid in range(1, 41):
+                body = json.dumps([{"ts": "2026-10-30T00:00:00Z", "netuid": netuid, "emission_percent": 2.5,
+                                    "daily_emission": 7.2e12}]).encode()
+                name = f"sn{netuid:03d}.json"
+                (run / name).write_bytes(body)
+                manifest["files"][name] = {"netuid": netuid, "url": "x", "status": 200, "rows": 1,
+                                           "sha256": hashlib.sha256(body).hexdigest()}
+            (run / "MANIFEST.json").write_text(json.dumps(manifest))
+            build_db.load_run(run, base / "s.db")
+            report.run(base / "s.db", ROOT / "sql" / "analysis.sql", base / "out")
+            day = list(csv.DictReader(open(base / "out" / "concentration_by_day.csv")))
+            self.assertEqual(len(day), 1)
+            self.assertAlmostEqual(float(day[0]["top10_share"]), 0.25)
+            self.assertAlmostEqual(float(day[0]["hhi"]), 1 / 40, places=4)
+            month = list(csv.DictReader(open(base / "out" / "concentration_by_month.csv")))
+            self.assertEqual(month[0]["month"], "2026-10-01")

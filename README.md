@@ -54,7 +54,8 @@ python3 -m unittest -v             # tests on synthetic data, no network
 
 | File | Answers |
 | --- | --- |
-| `concentration_by_day.csv` | Q1: top-10 share and Herfindahl index (HHI) per day, with a `quality_ok` flag |
+| `concentration_by_day.csv` | Q1: top-10 share and Herfindahl index (HHI) per day, quality-checked days only |
+| `concentration_quality.csv` | Data-quality flag per day for Q1 (`quality_ok`) |
 | `concentration_by_month.csv` | Q1: monthly averages over quality-checked days |
 | `activity_vs_reward_30d.csv` | Q2: 30-day volume, transactions and registrations per subnet next to its emission |
 | `emission_trend_90d.csv` | Q3: change in emission share, last 30 days versus 61–90 days back |

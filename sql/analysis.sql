@@ -29,25 +29,32 @@ SELECT date, COUNT(*) AS subnets, ROUND(SUM(volume_tao_24h), 2) AS total_volume_
        MAX(network_emission_tao) AS network_emission_tao, AVG(tao_price_usd) AS tao_price_usd
 FROM daily GROUP BY date ORDER BY date;
 
+-- name: concentration_quality
+-- Data quality per day for Q1. quality_ok = 1 when the day passes both rules fixed on 2026-10-30 after the
+-- first full fetch: (a) emission percent sums to at least 80 across subnets, and (b) at least 30 subnets have
+-- a share > 0. Failing days look like gaps or a different recording in the source.
+SELECT date, COUNT(*) AS subnets, SUM(CASE WHEN emission_percent > 0 THEN 1 ELSE 0 END) AS subnets_with_share,
+       ROUND(SUM(emission_percent), 2) AS percent_sum,
+       CASE WHEN SUM(emission_percent) >= 80 AND SUM(CASE WHEN emission_percent > 0 THEN 1 ELSE 0 END) >= 30
+            THEN 1 ELSE 0 END AS quality_ok
+FROM daily GROUP BY date ORDER BY date;
+
 -- name: concentration_by_day
--- Q1: How concentrated is the reward? Share of the top 10 subnets and the Herfindahl index (HHI),
--- re-normalised per day so it does not depend on the percentages summing exactly to 100.
--- quality_ok = 1 when the day passes both data-quality rules fixed on 2026-10-30 after the first full fetch:
---   (a) emission percent sums to at least 80 across subnets, and (b) at least 30 subnets have a share > 0.
--- Failing days look like gaps or a different recording in the source; filter on quality_ok = 1 in the dashboard.
-WITH t AS (
-    SELECT date, emission_percent AS e,
-           SUM(emission_percent) OVER (PARTITION BY date) AS tot,
-           ROW_NUMBER() OVER (PARTITION BY date ORDER BY emission_percent DESC) AS rk
-    FROM daily WHERE emission_percent IS NOT NULL
+-- Q1: How concentrated is the reward? Share of the top 10 subnets and the Herfindahl index (HHI) per day,
+-- re-normalised per day, for quality-checked days only (rules in concentration_quality).
+WITH d AS (
+    SELECT date, SUM(emission_percent) AS tot, SUM(CASE WHEN emission_percent > 0 THEN 1 ELSE 0 END) AS n_pos
+    FROM daily GROUP BY date
+),
+t AS (
+    SELECT daily.date, emission_percent AS e, d.tot,
+           ROW_NUMBER() OVER (PARTITION BY daily.date ORDER BY emission_percent DESC) AS rk
+    FROM daily JOIN d USING (date) WHERE d.tot >= 80 AND d.n_pos >= 30
 )
 SELECT date, COUNT(*) AS subnets,
-       SUM(CASE WHEN e > 0 THEN 1 ELSE 0 END) AS subnets_with_share,
-       ROUND(MAX(tot), 2) AS percent_sum,
        ROUND(SUM(CASE WHEN rk <= 10 THEN e ELSE 0 END) / MAX(tot), 4) AS top10_share,
-       ROUND(SUM((e / tot) * (e / tot)), 4) AS hhi,
-       CASE WHEN MAX(tot) >= 80 AND SUM(CASE WHEN e > 0 THEN 1 ELSE 0 END) >= 30 THEN 1 ELSE 0 END AS quality_ok
-FROM t WHERE tot > 0 GROUP BY date ORDER BY date;
+       ROUND(SUM((e / tot) * (e / tot)), 4) AS hhi
+FROM t GROUP BY date ORDER BY date;
 
 -- name: concentration_by_month
 -- Q1, monthly averages over quality-checked days only (same two rules as above).
