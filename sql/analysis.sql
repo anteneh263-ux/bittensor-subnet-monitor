@@ -32,6 +32,9 @@ FROM daily GROUP BY date ORDER BY date;
 -- name: concentration_by_day
 -- Q1: How concentrated is the reward? Share of the top 10 subnets and the Herfindahl index (HHI),
 -- re-normalised per day so it does not depend on the percentages summing exactly to 100.
+-- quality_ok = 1 when the day passes both data-quality rules fixed on 2026-10-30 after the first full fetch:
+--   (a) emission percent sums to at least 80 across subnets, and (b) at least 30 subnets have a share > 0.
+-- Failing days look like gaps or a different recording in the source; filter on quality_ok = 1 in the dashboard.
 WITH t AS (
     SELECT date, emission_percent AS e,
            SUM(emission_percent) OVER (PARTITION BY date) AS tot,
@@ -39,9 +42,31 @@ WITH t AS (
     FROM daily WHERE emission_percent IS NOT NULL
 )
 SELECT date, COUNT(*) AS subnets,
+       SUM(CASE WHEN e > 0 THEN 1 ELSE 0 END) AS subnets_with_share,
+       ROUND(MAX(tot), 2) AS percent_sum,
        ROUND(SUM(CASE WHEN rk <= 10 THEN e ELSE 0 END) / MAX(tot), 4) AS top10_share,
-       ROUND(SUM((e / tot) * (e / tot)), 4) AS hhi
+       ROUND(SUM((e / tot) * (e / tot)), 4) AS hhi,
+       CASE WHEN MAX(tot) >= 80 AND SUM(CASE WHEN e > 0 THEN 1 ELSE 0 END) >= 30 THEN 1 ELSE 0 END AS quality_ok
 FROM t WHERE tot > 0 GROUP BY date ORDER BY date;
+
+-- name: concentration_by_month
+-- Q1, monthly averages over quality-checked days only (same two rules as above).
+WITH d AS (
+    SELECT date, SUM(emission_percent) AS tot, SUM(CASE WHEN emission_percent > 0 THEN 1 ELSE 0 END) AS n_pos
+    FROM daily GROUP BY date
+),
+t AS (
+    SELECT daily.date, emission_percent AS e, d.tot,
+           ROW_NUMBER() OVER (PARTITION BY daily.date ORDER BY emission_percent DESC) AS rk
+    FROM daily JOIN d USING (date) WHERE d.tot >= 80 AND d.n_pos >= 30
+),
+day AS (
+    SELECT date, SUM(CASE WHEN rk <= 10 THEN e ELSE 0 END) / MAX(tot) AS top10, SUM((e / tot) * (e / tot)) AS hhi
+    FROM t GROUP BY date
+)
+SELECT substr(date, 1, 7) || '-01' AS month, COUNT(*) AS days, ROUND(AVG(top10), 4) AS avg_top10_share,
+       ROUND(AVG(hhi), 4) AS avg_hhi
+FROM day GROUP BY substr(date, 1, 7) ORDER BY month;
 
 -- name: activity_vs_reward_30d
 -- Q2: Market activity relative to the estimated reward a subnet receives (last 30 days, in TAO).

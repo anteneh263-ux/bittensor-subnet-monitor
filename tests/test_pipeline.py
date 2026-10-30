@@ -90,7 +90,7 @@ class Pipeline(unittest.TestCase):
         counts = report.run(self.db, ROOT / "sql" / "analysis.sql", out)
         self.assertEqual(set(counts), {"emission_share_check", "coverage", "latest_snapshot", "network_daily", "concentration_by_day",
                                        "activity_vs_reward_30d", "emission_trend_90d",
-                                       "subnet_daily_dashboard"})
+                                       "subnet_daily_dashboard", "concentration_by_month"})
         dash = list(csv.DictReader(open(out / "subnet_daily_dashboard.csv")))
         self.assertEqual(len(dash), 300)
         self.assertEqual(dash[0]["subnet"], "SN1")
@@ -99,6 +99,8 @@ class Pipeline(unittest.TestCase):
         self.assertEqual(len(conc), 100)
         self.assertAlmostEqual(float(conc[-1]["top10_share"]), 1.0)          # only 3 subnets
         self.assertAlmostEqual(float(conc[-1]["hhi"]), 0.5**2 + 0.3**2 + 0.2**2, places=4)
+        self.assertEqual(conc[-1]["quality_ok"], "0")        # only 3 subnets with a share: fails rule (b)
+        self.assertEqual(list(csv.DictReader(open(out / "concentration_by_month.csv"))), [])
         act = {r["netuid"]: r for r in csv.DictReader(open(out / "activity_vs_reward_30d.csv"))}
         self.assertEqual(int(act["1"]["days"]), 30)
         self.assertAlmostEqual(float(act["4"]["avg_volume_tao_24h"]), 400.0)          # rao -> TAO

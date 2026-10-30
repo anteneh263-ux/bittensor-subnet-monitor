@@ -54,7 +54,8 @@ python3 -m unittest -v             # tests on synthetic data, no network
 
 | File | Answers |
 | --- | --- |
-| `concentration_by_day.csv` | Q1: top-10 share and Herfindahl index (HHI) of emission per day |
+| `concentration_by_day.csv` | Q1: top-10 share and Herfindahl index (HHI) per day, with a `quality_ok` flag |
+| `concentration_by_month.csv` | Q1: monthly averages over quality-checked days |
 | `activity_vs_reward_30d.csv` | Q2: 30-day volume, transactions and registrations per subnet next to its emission |
 | `emission_trend_90d.csv` | Q3: change in emission share, last 30 days versus 61–90 days back |
 | `latest_snapshot.csv` | Latest day per subnet |
@@ -74,6 +75,9 @@ python3 -m unittest -v             # tests on synthetic data, no network
   network (SN0) returns no data and subnets that were deregistered during the year are not in the source.
   The first day has 87 subnets, the last 128. Concentration measures are therefore re-normalised per day and
   describe the subnets present in the data, not the whole network.
+- Two data-quality rules, fixed on 2026-10-30 after the first full fetch: a day is used for Q1 only if emission
+  percent sums to at least 80 and at least 30 subnets have a share above zero. 40 of 366 days fail, mostly
+  2025-10-30 to 2025-12-16 (sums of about 50 that look like a different recording) and three days in June 2026.
 - History is limited to the last 365 days the API returns; subnets that were deregistered may be missing.
 - Activity is not the same as usefulness: trading volume can be speculative.
 
