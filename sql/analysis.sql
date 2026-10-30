@@ -47,7 +47,7 @@ FROM t WHERE tot > 0 GROUP BY date ORDER BY date;
 -- Q2: Market activity relative to the estimated reward a subnet receives (last 30 days, in TAO).
 WITH m AS (SELECT MAX(date) AS d FROM daily),
 win AS (SELECT daily.* FROM daily, m WHERE date > date(m.d, '-30 day'))
-SELECT netuid, COUNT(*) AS days,
+SELECT netuid, 'SN' || netuid AS subnet, COUNT(*) AS days,
        ROUND(AVG(emission_percent), 4) AS avg_emission_pct,
        ROUND(AVG(subnet_emission_tao), 2) AS avg_subnet_emission_tao,
        ROUND(AVG(volume_tao_24h), 2) AS avg_volume_tao_24h,
@@ -64,6 +64,17 @@ WITH m AS (SELECT MAX(date) AS d FROM daily),
 recent AS (SELECT netuid, AVG(emission_percent) AS v FROM daily, m WHERE date > date(m.d, '-30 day') GROUP BY netuid),
 earlier AS (SELECT netuid, AVG(emission_percent) AS v FROM daily, m
             WHERE date <= date(m.d, '-60 day') AND date > date(m.d, '-90 day') GROUP BY netuid)
-SELECT recent.netuid, ROUND(earlier.v, 3) AS earlier_pct, ROUND(recent.v, 3) AS recent_pct,
+SELECT recent.netuid, 'SN' || recent.netuid AS subnet, ROUND(earlier.v, 3) AS earlier_pct, ROUND(recent.v, 3) AS recent_pct,
        ROUND(recent.v - earlier.v, 3) AS change_pp
 FROM recent JOIN earlier USING (netuid) ORDER BY change_pp DESC;
+
+-- name: subnet_daily_dashboard
+-- Tidy table for the dashboard: one row per subnet per day, with a label and the share re-normalised
+-- over the subnets present that day (see the coverage note at the top of this file).
+SELECT date, netuid, 'SN' || netuid AS subnet,
+       ROUND(emission_percent, 4) AS emission_pct,
+       ROUND(100 * emission_percent / SUM(emission_percent) OVER (PARTITION BY date), 4) AS emission_share_pct,
+       ROUND(subnet_emission_tao, 3) AS subnet_emission_tao,
+       ROUND(volume_tao_24h, 3) AS volume_tao_24h,
+       tx_count_24h, neuron_registrations_24h, ROUND(subnet_tao_pool, 3) AS subnet_tao_pool, tao_price_usd
+FROM daily ORDER BY date, netuid;

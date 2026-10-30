@@ -60,6 +60,8 @@ python3 -m unittest -v             # tests on synthetic data, no network
 | `latest_snapshot.csv` | Latest day per subnet |
 | `network_daily.csv` | Network totals per day |
 | `coverage.csv` | Days of data per subnet (data-quality check) |
+| `subnet_daily_dashboard.csv` | Tidy daily table per subnet for the dashboard |
+| `emission_share_check.csv` | Sum of emission percent per day (data-quality check) |
 
 ## Limitations
 
@@ -79,5 +81,5 @@ python3 -m unittest -v             # tests on synthetic data, no network
 
 - [x] Pipeline, SQL and tests
 - [x] First full fetch and data-quality check (2026-10-30: 128 subnets, 39 342 daily rows)
-- [ ] Dashboard
+- [ ] Dashboard (Tableau Public; build guide in `docs/TABLEAU_GUIDE.md`)
 - [ ] One-page memo with three findings

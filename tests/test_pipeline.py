@@ -89,7 +89,12 @@ class Pipeline(unittest.TestCase):
         out = self.base / "output"
         counts = report.run(self.db, ROOT / "sql" / "analysis.sql", out)
         self.assertEqual(set(counts), {"emission_share_check", "coverage", "latest_snapshot", "network_daily", "concentration_by_day",
-                                       "activity_vs_reward_30d", "emission_trend_90d"})
+                                       "activity_vs_reward_30d", "emission_trend_90d",
+                                       "subnet_daily_dashboard"})
+        dash = list(csv.DictReader(open(out / "subnet_daily_dashboard.csv")))
+        self.assertEqual(len(dash), 300)
+        self.assertEqual(dash[0]["subnet"], "SN1")
+        self.assertAlmostEqual(float(dash[0]["emission_share_pct"]), 50.0)
         conc = list(csv.DictReader(open(out / "concentration_by_day.csv")))
         self.assertEqual(len(conc), 100)
         self.assertAlmostEqual(float(conc[-1]["top10_share"]), 1.0)          # only 3 subnets
