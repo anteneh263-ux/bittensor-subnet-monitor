@@ -47,9 +47,18 @@ CREATE TABLE IF NOT EXISTS subnet_daily (
 CREATE INDEX IF NOT EXISTS ix_daily_date ON subnet_daily(run_id, date);
 CREATE VIEW IF NOT EXISTS latest AS
     SELECT * FROM subnet_daily WHERE run_id = (SELECT MAX(run_id) FROM runs);
--- one row per subnet and day (the last observation of the day) from the newest run
+-- One row per subnet and day (the last observation of the day) from the newest run.
+-- Amounts arrive in rao (1 TAO = 1e9 rao) and are converted to TAO here.
+-- daily_emission is network-wide (same value for every subnet); emission_percent is a percentage (0-100).
+-- subnet_emission_tao is therefore an ESTIMATE: percent / 100 x network emission. See emission_share_check.
 CREATE VIEW IF NOT EXISTS daily AS
-    SELECT * FROM (
+    SELECT *,
+           volume_24h / 1e9                         AS volume_tao_24h,
+           tx_amount_24h / 1e9                      AS tx_amount_tao_24h,
+           subnet_tao / 1e9                         AS subnet_tao_pool,
+           daily_emission / 1e9                     AS network_emission_tao,
+           emission_percent / 100 * daily_emission / 1e9 AS subnet_emission_tao
+    FROM (
         SELECT l.*, ROW_NUMBER() OVER (PARTITION BY netuid, date ORDER BY ts DESC) AS rn FROM latest l
     ) WHERE rn = 1;
 """

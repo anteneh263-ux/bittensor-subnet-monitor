@@ -64,7 +64,11 @@ python3 -m unittest -v             # tests on synthetic data, no network
 ## Limitations
 
 - One third-party source. Figures are not cross-checked against the chain itself yet.
-- Units of `daily_emission` and `volume_24h` must be confirmed on the first real run before their ratio is interpreted.
+- Amounts are converted from rao to TAO (1 TAO = 1e9 rao). `daily_emission` is network-wide, so a subnet's
+  reward is estimated as `emission_percent / 100 × daily_emission`.
+- `daily_emission` reads 7 200 TAO for the whole year, although a halving of network emission was reported for
+  December 2025. Treat absolute TAO reward figures as unverified until checked against a second source.
+- 2026-05-30 to 2026-06-22: emission percent is zero for all subnets in the first test fetch (a gap in the source).
 - History is limited to the last 365 days the API returns; subnets that were deregistered may be missing.
 - Activity is not the same as usefulness: trading volume can be speculative.
 

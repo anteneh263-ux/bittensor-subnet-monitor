@@ -18,7 +18,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
 def make_run(base: pathlib.Path, days: int = 100) -> pathlib.Path:
-    """Three subnets; emission shares 50/30/20 %. SN2 is wrapped in {'data': [...]}, values as strings."""
+    """Three subnets with 50/30/20 % of a network emission of 7 200 TAO (amounts in rao, as the API sends).
+    SN2 is wrapped in {'data': [...]}, some values as strings."""
     run = base / "20261030T120000Z"
     run.mkdir(parents=True)
     start = dt.date(2026, 7, 23)
@@ -30,9 +31,9 @@ def make_run(base: pathlib.Path, days: int = 100) -> pathlib.Path:
             day = start + dt.timedelta(days=i)
             rows.append({
                 "ts": f"{day.isoformat()}T23:59:00Z", "netuid": netuid, "block_number": 1000 + i,
-                "emission_percent": str(share), "volume_24h": str(100.0 * netuid),
+                "emission_percent": str(share), "volume_24h": str(100e9 * netuid),
                 "tx_count_24h": 10 * netuid, "neuron_registrations_24h": 1,
-                "daily_emission": "50.0", "tao_price_usd": "400.0", "unexpected_field": "kept",
+                "daily_emission": "7200000000000", "tao_price_usd": "400.0", "unexpected_field": "kept",
             })
         payload = {"data": rows} if netuid == 2 else rows
         body = json.dumps(payload).encode()
@@ -87,7 +88,7 @@ class Pipeline(unittest.TestCase):
         build_db.load_run(self.run_dir, self.db)
         out = self.base / "output"
         counts = report.run(self.db, ROOT / "sql" / "analysis.sql", out)
-        self.assertEqual(set(counts), {"coverage", "latest_snapshot", "network_daily", "concentration_by_day",
+        self.assertEqual(set(counts), {"emission_share_check", "coverage", "latest_snapshot", "network_daily", "concentration_by_day",
                                        "activity_vs_reward_30d", "emission_trend_90d"})
         conc = list(csv.DictReader(open(out / "concentration_by_day.csv")))
         self.assertEqual(len(conc), 100)
@@ -95,7 +96,11 @@ class Pipeline(unittest.TestCase):
         self.assertAlmostEqual(float(conc[-1]["hhi"]), 0.5**2 + 0.3**2 + 0.2**2, places=4)
         act = {r["netuid"]: r for r in csv.DictReader(open(out / "activity_vs_reward_30d.csv"))}
         self.assertEqual(int(act["1"]["days"]), 30)
-        self.assertAlmostEqual(float(act["4"]["volume_to_emission"]), 400.0 / 50.0)
+        self.assertAlmostEqual(float(act["4"]["avg_volume_tao_24h"]), 400.0)          # rao -> TAO
+        self.assertAlmostEqual(float(act["4"]["avg_subnet_emission_tao"]), 0.2 * 7200)  # 20 % of network
+        self.assertAlmostEqual(float(act["4"]["volume_to_emission"]), round(400.0 / 1440.0, 3))
+        check = list(csv.DictReader(open(out / "emission_share_check.csv")))
+        self.assertAlmostEqual(float(check[0]["percent_sum"]), 100.0)
         trend = list(csv.DictReader(open(out / "emission_trend_90d.csv")))
         self.assertEqual(len(trend), 3)
         self.assertTrue(all(float(r["change_pp"]) == 0.0 for r in trend))  # constant shares
