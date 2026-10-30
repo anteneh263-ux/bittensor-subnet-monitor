@@ -2,8 +2,8 @@
 -- All queries read the `daily` view: one row per subnet per day, amounts converted from rao to TAO.
 -- Checked on the first real fetch (2026-10-30, SN1-5): amounts are in rao; daily_emission is the same for
 -- every subnet (network-wide, 7 200 TAO); emission_percent is a percentage (SN4 = 7.2). It should sum to
--- about 100 per day across all subnets: see `emission_share_check`. 2026-05-30..2026-06-22 had zero emission
--- percent for all fetched subnets (a gap in the source); days where the sum is 0 are excluded from Q1.
+-- about 100 per day across all subnets: see `emission_share_check`. On the full fetch it sums to a median of
+-- 94.7 (SN0 and deregistered subnets are missing), so Q1 re-normalises per day. Days summing to 0 are excluded.
 
 -- name: emission_share_check
 -- Data quality: does emission_percent sum to ~100 across subnets each day? Rows far from 100 need a look.

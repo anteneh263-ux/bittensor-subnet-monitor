@@ -68,13 +68,16 @@ python3 -m unittest -v             # tests on synthetic data, no network
   reward is estimated as `emission_percent / 100 × daily_emission`.
 - `daily_emission` reads 7 200 TAO for the whole year, although a halving of network emission was reported for
   December 2025. Treat absolute TAO reward figures as unverified until checked against a second source.
-- 2026-05-30 to 2026-06-22: emission percent is zero for all subnets in the first test fetch (a gap in the source).
+- Emission percentages sum to less than 100 on most days (median 94.7, about 50 a year ago), because the root
+  network (SN0) returns no data and subnets that were deregistered during the year are not in the source.
+  The first day has 87 subnets, the last 128. Concentration measures are therefore re-normalised per day and
+  describe the subnets present in the data, not the whole network.
 - History is limited to the last 365 days the API returns; subnets that were deregistered may be missing.
 - Activity is not the same as usefulness: trading volume can be speculative.
 
 ## Status
 
 - [x] Pipeline, SQL and tests
-- [ ] First full fetch and data-quality check
+- [x] First full fetch and data-quality check (2026-10-30: 128 subnets, 39 342 daily rows)
 - [ ] Dashboard
 - [ ] One-page memo with three findings
