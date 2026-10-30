@@ -1,0 +1,76 @@
+# Bittensor Subnet Monitor
+
+A small data pipeline and analysis of the Bittensor network's subnets, built the way an analytics
+consultant would deliver it: a business question first, then data, SQL, a dashboard and a one-page memo.
+
+> Descriptive analysis only. Nothing here is investment advice or a recommendation to buy, stake in or
+> mine any subnet or token.
+
+## The question
+
+Bittensor is a decentralised network where independent *subnets* produce digital services (inference,
+compute, storage, prediction) and are rewarded in the TAO token. A client considering the ecosystem would
+ask: **which subnets show real activity and sustainable economics, and which mainly live on rewards?**
+
+Three sub-questions, fixed before looking at the data:
+
+1. **Concentration** — how much of the network's emission goes to the top 10 subnets, and is that rising or falling?
+2. **Activity versus reward** — which subnets show trading and transaction activity in proportion to the reward they receive?
+3. **Momentum** — which subnets gained or lost emission share over the last 90 days?
+
+## Data
+
+[TaoMarketCap public API](https://api.taomarketcap.com), endpoint `GET /public/v1/analytics/subnet/{netuid}/`,
+anonymous tier (no key; 10 requests/minute). With `span=ALL` it returns up to 365 daily end-of-day rows per
+subnet: emission share, buy/sell volume, transactions, registrations, supply, emission and TAO price.
+
+Every fetch is saved untouched with a SHA-256 manifest, and the database refuses to load a raw file that has
+changed since it was fetched.
+
+## Pipeline
+
+```
+fetch.py  ──▶  data/raw/<run>/*.json + MANIFEST.json      (Python, standard library only)
+build_db.py ─▶ data/subnets.db  (SQLite: runs, subnet_daily, views latest + daily)
+report.py ──▶  output/*.csv     (one file per query in sql/analysis.sql)
+                     │
+                     ▼
+              dashboard (Power BI / Tableau Public / Looker Studio) + one-page memo
+```
+
+## Run it
+
+Requires Python 3.10+. No packages to install.
+
+```sh
+python3 fetch.py --netuids 1-5     # quick check (about 30 seconds)
+python3 fetch.py                   # all subnets, about 15 minutes
+python3 build_db.py
+python3 report.py
+python3 -m unittest -v             # tests on synthetic data, no network
+```
+
+## Outputs (`output/`)
+
+| File | Answers |
+| --- | --- |
+| `concentration_by_day.csv` | Q1: top-10 share and Herfindahl index (HHI) of emission per day |
+| `activity_vs_reward_30d.csv` | Q2: 30-day volume, transactions and registrations per subnet next to its emission |
+| `emission_trend_90d.csv` | Q3: change in emission share, last 30 days versus 61–90 days back |
+| `latest_snapshot.csv` | Latest day per subnet |
+| `network_daily.csv` | Network totals per day |
+| `coverage.csv` | Days of data per subnet (data-quality check) |
+
+## Limitations
+
+- One third-party source. Figures are not cross-checked against the chain itself yet.
+- Units of `daily_emission` and `volume_24h` must be confirmed on the first real run before their ratio is interpreted.
+- History is limited to the last 365 days the API returns; subnets that were deregistered may be missing.
+- Activity is not the same as usefulness: trading volume can be speculative.
+
+## Status
+
+- [x] Pipeline, SQL and tests
+- [ ] First full fetch and data-quality check
+- [ ] Dashboard
+- [ ] One-page memo with three findings
