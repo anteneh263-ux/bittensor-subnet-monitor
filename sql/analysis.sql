@@ -1,14 +1,16 @@
 -- Analysis queries for the newest loaded run. report.py runs each block and writes output/<name>.csv.
 -- All queries read the `daily` view: one row per subnet per day, amounts converted from rao to TAO.
 -- Checked on the first real fetch (2026-10-30, SN1-5): amounts are in rao; daily_emission is the same for
--- every subnet (network-wide, 7 200 TAO); emission_percent is a percentage (SN4 = 7.2). It should sum to
+-- every subnet (network-wide, reported as 7 200 TAO even after the Dec 2025 halving, so the `daily` view uses the
+-- published schedule instead: 7 200 before 2025-12-14, 3 600 from then on); emission_percent is a percentage (SN4 = 7.2). It should sum to
 -- about 100 per day across all subnets: see `emission_share_check`. On the full fetch it sums to a median of
 -- 94.7 (SN0 and deregistered subnets are missing), so Q1 re-normalises per day. Days summing to 0 are excluded.
 
 -- name: emission_share_check
 -- Data quality: does emission_percent sum to ~100 across subnets each day? Rows far from 100 need a look.
 SELECT date, COUNT(*) AS subnets, ROUND(SUM(emission_percent), 4) AS percent_sum,
-       MAX(network_emission_tao) AS network_emission_tao, MIN(network_emission_tao) AS min_network_emission_tao
+       MAX(network_emission_tao) AS network_emission_tao, MIN(network_emission_api_tao) AS min_network_emission_api_tao,
+       MAX(network_emission_api_tao) AS max_network_emission_api_tao
 FROM daily GROUP BY date ORDER BY date;
 
 -- name: coverage

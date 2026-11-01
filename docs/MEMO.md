@@ -1,6 +1,6 @@
 # Bittensor subnets: where do the rewards go, and is there activity behind them?
 
-*One-page memo · data to 30 Oct 2026 · [interactive dashboard](https://public.tableau.com/app/profile/anteneh.hailu/viz/Book1bittensorsubnet/Overview) · figures from `sql/analysis.sql`*
+*One-page memo · data to 30 Oct 2026 · updated 1 Nov 2026 · [interactive dashboard](https://public.tableau.com/app/profile/anteneh.hailu/viz/Book1bittensorsubnet/Overview) · figures from `sql/analysis.sql`*
 
 > Descriptive analysis only. Nothing here is investment advice or a recommendation to buy, stake in or mine any subnet or token.
 
@@ -24,13 +24,17 @@ The increase came between January and March 2026. Since then the top-10 share ha
 
 ## 2. Several of the subnets with the largest emission share have low trading volume relative to estimated reward
 
-**Measure:** average 24-hour trading volume divided by the estimated daily reward, both in TAO, over the last 30 days. Estimated reward = emission share × network emission. This says nothing about profit.
+**Measure:** average 24-hour trading volume divided by the estimated daily reward, both in TAO, over the last 30 days (1–30 Oct 2026). Estimated reward = emission share × network emission. This says nothing about profit.
 
-**Population:** the 62 subnets with an estimated reward of at least 1 TAO per day. Among them the **median** ratio is about 19, and half fall between 7 and 111.
+**Network emission:** the API reports 7 200 TAO per day all year. The first halving cut issuance to 3 600 TAO per day around 14 December 2025 ([The Block](https://www.theblock.co/post/381638/bittensors-halving-tao-price), [Forklog](https://forklog.com/en/bittensor-token-drops-8-following-first-halving/)). The estimates below use 3 600, so they are half of what the API implies.
 
-Among the five largest by emission share, the ratio is between 3.5 and 7.4: SN51 7.4, SN64 3.5, SN4 7.0, SN120 5.6, SN107 6.0. Of the ten largest, only SN53 (28) and SN28 (32) are above the median. A low ratio does not mean low trading in total. SN51, for example, has the fourth-highest absolute volume of the 62.
+**Population:** the 55 subnets with an estimated reward of at least 1 TAO per day. Among them the **median** ratio is about 32, and half fall between 14 and 204.
 
-**Preliminary:** the denominator uses TAO rewards that the README flags as unverified. Network emission reads as a constant 7 200 TAO per day, even though a halving was reported. A common scaling error would change the level of the ratios (19, 3.5–7.4) but keep their ranking, as long as the set of subnets and their date coverage are unchanged. The 1 TAO cut-off and the median must be recomputed if the reward estimates are corrected, since a different cut-off can change which subnets are included.
+Among the five largest by emission share, the ratio is between 6.9 and 14.9: SN51 14.9, SN64 6.9, SN4 13.9, SN120 11.2, SN107 12.1. Of the ten largest, only SN53 (57) and SN28 (64) are above the median. A low ratio does not mean low trading in total. SN51 has the fourth-highest absolute volume of the 55.
+
+**What the correction changed:** with the API figure of 7 200 TAO per day, the same measure gave 62 subnets, a median of 19 and 3.5–7.4 for the five largest. Halving the reward doubles every ratio, so the ranking of a given subnet stays the same. But the 1 TAO cut-off now excludes seven more subnets, so the median does not simply double. The pattern in this finding holds under both figures.
+
+**Still an estimate:** the halving date comes from press reports, not the chain, and each subnet's reward is derived from its share rather than read on-chain.
 
 ## 3. Momentum: average share, last 30 days versus 61–90 days back
 
@@ -44,12 +48,12 @@ Two subnets went from almost no emission to 2–3% between the two windows. High
 ## Caveats
 
 - One third-party source (TaoMarketCap public API), not yet cross-checked against the chain.
-- Shares and rankings are more reliable than absolute TAO amounts (see finding 2).
+- Absolute TAO rewards use the published halving schedule (3 600 TAO per day since about 14 Dec 2025), not the API's 7 200. Shares and rankings are more reliable than absolute TAO amounts.
 - History is limited to the 365 days the API returns. Deregistered subnets and SN0 are missing.
 - Trading volume can be speculative. It is a rough proxy for demand, not for usefulness.
 
 ## Suggested next steps
 
-1. Cross-check network emission and the halving against an on-chain source, then recompute finding 2.
+1. Confirm the halving block and per-subnet emission on-chain, then recompute finding 2.
 2. Add a usage measure beyond trading, such as validator queries or miner counts.
 3. Re-run monthly and watch whether the 58–68% range holds.

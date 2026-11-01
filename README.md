@@ -78,11 +78,16 @@ python3 -m unittest -v             # tests on synthetic data, no network
 
 ## Limitations
 
-- One third-party source. Figures are not cross-checked against the chain itself yet.
-- Amounts are converted from rao to TAO (1 TAO = 1e9 rao). `daily_emission` is network-wide, so a subnet's
-  reward is estimated as `emission_percent / 100 × daily_emission`.
-- `daily_emission` reads 7 200 TAO for the whole year, although a halving of network emission was reported for
-  December 2025. Treat absolute TAO reward figures as unverified until checked against a second source.
+- One third-party source for the subnet data. Figures are not cross-checked against the chain itself yet.
+- Amounts are converted from rao to TAO (1 TAO = 1e9 rao). A subnet's reward is estimated as
+  `emission_percent / 100 × network emission`.
+- The API's `daily_emission` reads 7 200 TAO for the whole year, but the first halving (1 → 0.5 TAO per block,
+  7 200 → 3 600 TAO per day) was reported for about 14 December 2025
+  ([The Block](https://www.theblock.co/post/381638/bittensors-halving-tao-price),
+  [Forklog](https://forklog.com/en/bittensor-token-drops-8-following-first-halving/)). Since 2026-11-01 the `daily`
+  view therefore uses that schedule (7 200 before 2025-12-14, 3 600 from then on) and keeps the API value as
+  `network_emission_api_tao`. The halving day is taken from these reports and is not confirmed on-chain; it only
+  affects days in December 2025. Absolute TAO figures still rest on this schedule, not on per-subnet chain data.
 - Emission percentages sum to less than 100 on most days (median 94.7, about 50 a year ago), because the root
   network (SN0) returns no data and subnets that were deregistered during the year are not in the source.
   The first day has 87 subnets, the last 128. Concentration measures are therefore re-normalised per day and
@@ -98,5 +103,6 @@ python3 -m unittest -v             # tests on synthetic data, no network
 - [x] Pipeline, SQL and tests
 - [x] First full fetch and data-quality check (2026-10-30: 128 subnets, 39 342 daily rows)
 - [x] Dashboard published on [Tableau Public](https://public.tableau.com/app/profile/anteneh.hailu/viz/Book1bittensorsubnet/Overview) (build guide in `docs/TABLEAU_GUIDE.md`)
-- [x] One-page memo with three findings ([`docs/MEMO.md`](docs/MEMO.md)), computed from the exported CSVs in `output/` (not committed)
-- [ ] Cross-check absolute TAO reward estimates against a second source before using them for conclusions
+- [x] One-page memo with three findings ([`docs/MEMO.md`](docs/MEMO.md)), computed from the CSVs in `output/`
+- [x] Network emission checked against published reports of the December 2025 halving; reward estimates corrected (2026-11-01)
+- [ ] Confirm the halving block and per-subnet emission on-chain

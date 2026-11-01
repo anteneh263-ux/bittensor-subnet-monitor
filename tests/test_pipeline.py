@@ -104,8 +104,8 @@ class Pipeline(unittest.TestCase):
         act = {r["netuid"]: r for r in csv.DictReader(open(out / "activity_vs_reward_30d.csv"))}
         self.assertEqual(int(act["1"]["days"]), 30)
         self.assertAlmostEqual(float(act["4"]["avg_volume_tao_24h"]), 400.0)          # rao -> TAO
-        self.assertAlmostEqual(float(act["4"]["avg_subnet_emission_tao"]), 0.2 * 7200)  # 20 % of network
-        self.assertAlmostEqual(float(act["4"]["volume_to_emission"]), round(400.0 / 1440.0, 3))
+        self.assertAlmostEqual(float(act["4"]["avg_subnet_emission_tao"]), 0.2 * 3600)  # 20 % of post-halving network
+        self.assertAlmostEqual(float(act["4"]["volume_to_emission"]), round(400.0 / 720.0, 3))  # 400 TAO volume / 20 % of 3 600
         check = list(csv.DictReader(open(out / "emission_share_check.csv")))
         self.assertAlmostEqual(float(check[0]["percent_sum"]), 100.0)
         trend = list(csv.DictReader(open(out / "emission_trend_90d.csv")))
