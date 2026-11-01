@@ -1,48 +1,55 @@
-# Bittensor subnets: who earns the rewards, and is there activity behind them?
+# Bittensor subnets: where do the rewards go, and is there activity behind them?
 
-*One-page memo · data to 30 Oct 2026 · [interactive dashboard](https://public.tableau.com/app/profile/anteneh.hailu/viz/Book1bittensorsubnet/Overview)*
+*One-page memo · data to 30 Oct 2026 · [interactive dashboard](https://public.tableau.com/app/profile/anteneh.hailu/viz/Book1bittensorsubnet/Overview) · figures from `sql/analysis.sql`*
 
 > Descriptive analysis only. Nothing here is investment advice or a recommendation to buy, stake in or mine any subnet or token.
 
 ## Summary
 
-Network rewards (emission) are flowing to fewer subnets. The ten largest now receive 60–68% of emission, up from about 48% a year ago. The subnets that earn the most also trade the least relative to their reward. Over the last 90 days, the top of the table has been reshuffling: a few large subnets lost share and a group of small ones gained.
+Among the subnets in the data, network emission has become more concentrated. The ten largest receive 60–68% of it in most months since March 2026, against about 48% in November 2025. Several of the subnets with the largest emission share have low trading volume relative to their estimated reward. Over the last 90 days, a few large subnets lost share and a group of small ones gained.
 
-## 1. Concentration is rising
+## 1. Concentration is rising among the subnets in the data
 
 | | Nov 2025 | Mar 2026 | Aug 2026 | Oct 2026 |
 | --- | --- | --- | --- | --- |
 | Top-10 share of emission | 47.5% | 64.3% | 68.2% | 60.0% |
 | Herfindahl index (HHI) | 0.035 | 0.087 | 0.060 | 0.054 |
+| Valid days in the month | 11 of 30 | 31 of 31 | 31 of 31 | 30 of 30 (data ends 30 Oct) |
 
-The jump happened between January and March 2026. Since then the top-10 share has moved in a 58–68% band. HHI peaked in March, when a single subnet dominated, and has eased since. The rewards are now spread across the top ten rather than going to a single leader, but they still sit within that small group.
+**How it is measured:** monthly averages of daily values. Each day's shares are re-normalised so they sum to 100% across the subnets in the data. The root network (SN0) and deregistered subnets are missing from the source, so this is a share of the subnets present, not of the whole network. Only days that pass both data-quality rules are used: emission percent sums to at least 80, and at least 30 subnets have a share above zero.
 
-## 2. The biggest earners trade the least relative to their reward
+**Caveat:** November 2025 rests on 11 valid days, and December 2025 on 15 of 31. The starting point is therefore less certain than the later months.
 
-Among the 62 subnets that earned at least 1 TAO per day over the last 30 days, the median subnet trades about **19×** its daily reward. Half of them fall between 7× and 111×.
+The increase came between January and March 2026. Since then the top-10 share has stayed between 58% and 68%. HHI peaked in March and has eased since, so the emission is now spread across the top ten rather than going to one leader.
 
-The largest earners sit at the bottom of that range. SN51 (14% of emission) trades 7.4× its reward, SN64 3.5×, SN4 7.0×, SN120 5.6× and SN107 6.0×. Of the ten largest earners, only SN53 (28×) and SN28 (32×) are above the median.
+## 2. Several of the subnets with the largest emission share have low trading volume relative to estimated reward
 
-The large earners may depend more on rewards than on outside demand. But trading volume is a rough proxy: it says nothing about whether the service a subnet produces is used.
+**Measure:** average 24-hour trading volume divided by the estimated daily reward, both in TAO, over the last 30 days. Estimated reward = emission share × network emission. This says nothing about profit.
 
-## 3. Momentum: the top of the table is shifting
+**Population:** the 62 subnets with an estimated reward of at least 1 TAO per day. Among them the **median** ratio is about 19, and half fall between 7 and 111.
 
-Comparing the last 30 days with 61–90 days ago:
+Among the five largest by emission share, the ratio is between 3.5 and 7.4: SN51 7.4, SN64 3.5, SN4 7.0, SN120 5.6, SN107 6.0. Of the ten largest, only SN53 (28) and SN28 (32) are above the median. A low ratio does not mean low trading in total. SN51, for example, has the fourth-highest absolute volume of the 62.
 
-- **Gainers:** SN51 (+3.3 points, 10.7% → 14.0%), SN80 (+3.0, from almost zero), SN90 (+2.4, from zero) and SN28 (+2.0).
-- **Losers:** SN107 (−4.2, 8.8% → 4.5%), SN64 (−2.6), SN97 (−2.0), SN120 (−1.7), SN44 (−1.3) and SN15 (−1.1).
+**Preliminary:** the denominator uses TAO rewards that the README flags as unverified. Network emission reads as a constant 7 200 TAO per day, even though a halving was reported. A constant scaling error would shift every ratio by the same factor. The ranking would stay the same, but the levels (19, 3.5–7.4) could be off.
 
-Two subnets went from almost no emission to 2–3% within three months. The share at the top is not locked in, even though concentration is high.
+## 3. Momentum: average share, last 30 days versus 61–90 days back
+
+**Measure:** each subnet's average daily emission percent over the last 30 days (1–30 Oct 2026) minus its average over days 61–90 back (2–31 Aug 2026), in percentage points. This compares two monthly averages, not two single dates. It uses raw emission percent as reported, without re-normalisation or the quality filter. All 60 days in the two windows pass the quality rules.
+
+- **Largest gains:** SN51 (+3.3, 10.7% → 14.0%), SN80 (+3.0, from almost zero), SN90 (+2.4, from zero) and SN28 (+2.0).
+- **Largest losses:** SN107 (−4.2, 8.8% → 4.5%), SN64 (−2.6), SN97 (−2.0), SN120 (−1.7), SN44 (−1.3) and SN15 (−1.1).
+
+Two subnets went from almost no emission to 2–3% between the two windows. High concentration does not mean the same subnets stay at the top.
 
 ## Caveats
 
 - One third-party source (TaoMarketCap public API), not yet cross-checked against the chain.
-- Absolute TAO rewards rest on a network emission figure that did not change through a reported halving. Shares and ratios are more reliable than TAO amounts.
-- 40 of 366 days fail the data-quality rules and are left out of the concentration figures. Deregistered subnets and the root network (SN0) are missing from the source.
-- Trading volume can be speculative. High activity does not mean a subnet is useful.
+- Shares and rankings are more reliable than absolute TAO amounts (see finding 2).
+- History is limited to the 365 days the API returns. Deregistered subnets and SN0 are missing.
+- Trading volume can be speculative. It is a rough proxy for demand, not for usefulness.
 
 ## Suggested next steps
 
-1. Cross-check emission and the halving against an on-chain source.
+1. Cross-check network emission and the halving against an on-chain source, then recompute finding 2.
 2. Add a usage measure beyond trading, such as validator queries or miner counts.
-3. Re-run monthly and watch whether the 58–68% band holds.
+3. Re-run monthly and watch whether the 58–68% range holds.
