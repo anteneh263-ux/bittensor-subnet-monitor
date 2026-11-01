@@ -30,11 +30,11 @@ The increase came between January and March 2026. Since then the top-10 share ha
 
 Among the five largest by emission share, the ratio is between 3.5 and 7.4: SN51 7.4, SN64 3.5, SN4 7.0, SN120 5.6, SN107 6.0. Of the ten largest, only SN53 (28) and SN28 (32) are above the median. A low ratio does not mean low trading in total. SN51, for example, has the fourth-highest absolute volume of the 62.
 
-**Preliminary:** the denominator uses TAO rewards that the README flags as unverified. Network emission reads as a constant 7 200 TAO per day, even though a halving was reported. A constant scaling error would shift every ratio by the same factor. The ranking would stay the same, but the levels (19, 3.5–7.4) could be off.
+**Preliminary:** the denominator uses TAO rewards that the README flags as unverified. Network emission reads as a constant 7 200 TAO per day, even though a halving was reported. A common scaling error would change the level of the ratios (19, 3.5–7.4) but keep their ranking, as long as the set of subnets and their date coverage are unchanged. The 1 TAO cut-off and the median must be recomputed if the reward estimates are corrected, since a different cut-off can change which subnets are included.
 
 ## 3. Momentum: average share, last 30 days versus 61–90 days back
 
-**Measure:** each subnet's average daily emission percent over the last 30 days (1–30 Oct 2026) minus its average over days 61–90 back (2–31 Aug 2026), in percentage points. This compares two monthly averages, not two single dates. It uses raw emission percent as reported, without re-normalisation or the quality filter. All 60 days in the two windows pass the quality rules.
+**Measure:** each subnet's average daily emission percent over the last 30 days (1–30 Oct 2026) minus its average over days 61–90 back (2–31 Aug 2026), in percentage points. This compares two monthly averages, not two single dates. It uses raw emission percent as reported, without re-normalisation or the quality filter. All 60 days in the two windows pass the quality rules, but that does not mean coverage is complete: SN0 and deregistered subnets are still missing from the source, and emission percent sums to between 98.2 and 100.5 on those days rather than exactly 100.
 
 - **Largest gains:** SN51 (+3.3, 10.7% → 14.0%), SN80 (+3.0, from almost zero), SN90 (+2.4, from zero) and SN28 (+2.0).
 - **Largest losses:** SN107 (−4.2, 8.8% → 4.5%), SN64 (−2.6), SN97 (−2.0), SN120 (−1.7), SN44 (−1.3) and SN15 (−1.1).
