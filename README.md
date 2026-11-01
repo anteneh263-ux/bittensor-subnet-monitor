@@ -96,5 +96,6 @@ python3 -m unittest -v             # tests on synthetic data, no network
 
 - [x] Pipeline, SQL and tests
 - [x] First full fetch and data-quality check (2026-10-30: 128 subnets, 39 342 daily rows)
-- [ ] Dashboard (Tableau Public; build guide in `docs/TABLEAU_GUIDE.md`)
-- [ ] One-page memo with three findings
+- [x] Dashboard published on [Tableau Public](https://public.tableau.com/app/profile/anteneh.hailu/viz/Book1bittensorsubnet/Overview) (build guide in `docs/TABLEAU_GUIDE.md`)
+- [ ] Write a one-page memo with three findings supported by the exported data
+- [ ] Cross-check absolute TAO reward estimates against a second source before using them for conclusions
