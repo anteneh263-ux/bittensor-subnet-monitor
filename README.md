@@ -6,6 +6,16 @@ consultant would deliver it: a business question first, then data, SQL, a dashbo
 > Descriptive analysis only. Nothing here is investment advice or a recommendation to buy, stake in or
 > mine any subnet or token.
 
+## Dashboard
+
+**[Open the interactive dashboard on Tableau Public](https://public.tableau.com/app/profile/anteneh.hailu/viz/Book1bittensorsubnet/Overview)**
+
+One page, three views, built from the CSV files in `output/`:
+
+- **Concentration**: monthly average share of emission going to the 10 largest subnets (rose from about 48% to 60-68%).
+- **Activity versus reward**: daily trading volume against daily reward per subnet, last 30 days (log scales).
+- **Winners and losers**: change in emission share, last 30 days versus 61-90 days ago, for subnets that moved at least 1 point.
+
 ## The question
 
 Bittensor is a decentralised network where independent *subnets* produce digital services (inference,
