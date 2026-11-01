@@ -10,7 +10,8 @@ consultant would deliver it: a business question first, then data, SQL, a dashbo
 
 **[Open the interactive dashboard on Tableau Public](https://public.tableau.com/app/profile/anteneh.hailu/viz/Book1bittensorsubnet/Overview)**
 
-One page, three views, built from the CSV files in `output/`:
+One page, three views, built from the CSV files in `output/`. The findings are written up in [`docs/MEMO.md`](docs/MEMO.md).
+
 
 - **Concentration**: monthly average share of emission going to the 10 largest subnets (rose from about 48% to 60-68%).
 - **Activity versus reward**: daily trading volume against daily reward per subnet, last 30 days (log scales).
@@ -97,5 +98,5 @@ python3 -m unittest -v             # tests on synthetic data, no network
 - [x] Pipeline, SQL and tests
 - [x] First full fetch and data-quality check (2026-10-30: 128 subnets, 39 342 daily rows)
 - [x] Dashboard published on [Tableau Public](https://public.tableau.com/app/profile/anteneh.hailu/viz/Book1bittensorsubnet/Overview) (build guide in `docs/TABLEAU_GUIDE.md`)
-- [ ] Write a one-page memo with three findings supported by the exported data
+- [x] One-page memo with three findings ([`docs/MEMO.md`](docs/MEMO.md)), computed from the exported CSVs in `output/` (not committed)
 - [ ] Cross-check absolute TAO reward estimates against a second source before using them for conclusions
